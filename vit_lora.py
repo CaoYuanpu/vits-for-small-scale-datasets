@@ -503,17 +503,3 @@ if __name__ == '__main__':
     keys = ['T Loss', 'T Top-1', 'V Loss', 'V Top-1']
     
     main(args)
-
-
-nohup python3 -u finetune.py  --arch vit --dataset Tiny-Imagenet --datapath ~/data/tiny-imagenet-200 --lr 0.002 --patch_size 8 --batch_size 256 --epochs 100 --gpu 3 > log/ti_lr0.002_ps8.log 2>&1 &
-
-nohup python3 -u finetune.py  --arch vit --dataset CIFAR100 --datapath ~/data/cifar-100-python --batch_size 256 --epochs 100 --gpu 1 > cifar100.log 2>&1 &
-
-nohup python3 -u finetune.py  --arch vit --dataset CIFAR100 --datapath ~/data/cifar-100-python --lr 0.002 --batch_size 256 --epochs 100 --gpu 1 > log/cifar100_lr0.002.log 2>&1 &
-
-
-
-
-
-
-nohup python3 -u finetune.py  --arch vit --dataset Tiny-Imagenet --datapath ~/data/tiny-imagenet-200 --batch_size 256 --epochs 100 > ti.log 2>&1 &
