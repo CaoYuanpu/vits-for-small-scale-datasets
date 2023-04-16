@@ -320,7 +320,7 @@ class VisionTransformer_lora(nn.Module):
         self.blocks = nn.ModuleList([
             Block_lora(
                 dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, qk_scale=qk_scale,
-                drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[i], norm_layer=norm_laye, r=self.lora_rank)
+                drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[i], norm_layer=norm_layer, r=self.lora_rank)
             for i in range(depth)])
         self.norm = norm_layer(embed_dim)
 
