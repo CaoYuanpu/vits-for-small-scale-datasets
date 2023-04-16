@@ -20,6 +20,20 @@ def create_model(img_size, n_classes, args):
             qkv_bias=True,
             drop_path_rate=args.sd,
             norm_layer=partial(nn.LayerNorm, eps=1e-6))
+        
+    if args.arch == "vit_split":
+        patch_size = 4 if img_size == 32 else 8   #4 if img_size = 32 else 8
+        model = VisionTransformer(img_size=[img_size],
+            patch_size=args.patch_size,
+            in_chans=3,
+            num_classes=n_classes,
+            embed_dim=192,
+            depth=9,
+            num_heads=12,
+            mlp_ratio=args.vit_mlp_ratio,
+            qkv_bias=False,
+            drop_path_rate=args.sd,
+            norm_layer=partial(nn.LayerNorm, eps=1e-6), split=True)
 
     elif args.arch == "vit_lora":
         patch_size = 4 if img_size == 32 else 8   #4 if img_size = 32 else 8
