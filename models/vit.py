@@ -130,6 +130,11 @@ class Attention_lora(nn.Module):
         x = self.proj_drop(x)
         return x, attn
 
+    def reset_parameters_lora(self):
+        self.qkv.reset_parameters_lora()
+        self.proj.reset_parameters_lora()
+
+
 
 class Block(nn.Module):
     def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop=0., attn_drop=0.,
@@ -171,6 +176,10 @@ class Block_lora(nn.Module):
         x = x + self.drop_path(y)
         x = x + self.drop_path(self.mlp(self.norm2(x)))
         return x
+
+    def reset_parameters_lora(self):
+        self.attn.reset_parameters_lora()
+        
 
 class PatchEmbed(nn.Module):
     """ Image to Patch Embedding
@@ -333,8 +342,7 @@ class VisionTransformer_lora(nn.Module):
 
     def reset_parameters_lora(self):
         for b in self.blocks:
-            print(b)
-        input()
+            b.reset_parameters_lora()
         self.head.reset_parameters_lora()
     
     def _init_weights(self, m):
