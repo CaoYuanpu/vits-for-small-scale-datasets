@@ -157,8 +157,7 @@ class Attention_lora(nn.Module):
 
         qkv = self.qkv(x).reshape(B, N, 3, self.num_heads, C // self.num_heads).permute(2, 0, 3, 1, 4)
         q, k, v = qkv[0], qkv[1], qkv[2]
-        print(q.shape, k.shape, v.shape)
-        input()
+
         attn = (q @ k.transpose(-2, -1)) * self.scale
         attn = attn.softmax(dim=-1)
         attn = self.attn_drop(attn)
@@ -172,6 +171,50 @@ class Attention_lora(nn.Module):
         self.qkv.reset_parameters_lora()
         self.proj.reset_parameters_lora()
 
+class Attention_lora_split(nn.Module):
+    def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0., r=4):
+        super().__init__()
+        self.lora_rank = r
+        self.num_heads = num_heads
+        head_dim = dim // num_heads
+        self.scale = qk_scale or head_dim ** -0.5
+        all_head_dim = head_dim * self.num_heads
+        # self.qkv = nn.Linear(dim, dim * 3, bias=qkv_bias)
+        # self.qkv = lora.MergedLinear(dim, 3*dim, r=self.lora_rank, enable_lora=[True, True, True])
+        
+        self.q = lora.Linear(dim, dim, r=self.lora_rank)
+        self.k = lora.Linear(dim, dim, r=self.lora_rank)
+        self.v = lora.Linear(dim, dim, r=self.lora_rank)
+
+        self.attn_drop = nn.Dropout(attn_drop)
+        # self.proj = nn.Linear(all_head_dim, dim)
+        self.proj = lora.Linear(all_head_dim, dim, r=self.lora_rank)
+        self.proj_drop = nn.Dropout(proj_drop)
+#        self.to_conv3d = nn.Sequential(nn.Conv3d(dim,all_head_dim, 3,padding='same'), 
+#                                    nn.BatchNorm3d(all_head_dim))
+
+    def forward(self, x):
+        B, N, C = x.shape
+
+        q = self.q(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+        k = self.k(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+        v = self.v(x).reshape(B, N, self.num_heads, C // self.num_heads).permute(0, 2, 1, 3)
+        print('lora split')
+        input()
+        attn = (q @ k.transpose(-2, -1)) * self.scale
+        attn = attn.softmax(dim=-1)
+        attn = self.attn_drop(attn)
+
+        x = (attn @ v).transpose(1, 2).reshape(B, N, C)
+        x = self.proj(x)
+        x = self.proj_drop(x)
+        return x, attn
+
+    def reset_parameters_lora(self):
+        self.q.reset_parameters_lora()
+        self.k.reset_parameters_lora()
+        self.v.reset_parameters_lora()
+        self.proj.reset_parameters_lora()
 
 
 class Block(nn.Module):
@@ -200,12 +243,16 @@ class Block(nn.Module):
 
 class Block_lora(nn.Module):
     def __init__(self, dim, num_heads, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop=0., attn_drop=0.,
-                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, r=4):
+                 drop_path=0., act_layer=nn.GELU, norm_layer=nn.LayerNorm, r=4, split=False):
         super().__init__()
         self.lora_rank = r
         self.norm1 = norm_layer(dim)
-        self.attn = Attention_lora(
-            dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop, r=self.lora_rank)
+        if split:
+            self.attn = Attention_lora_split(
+                dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop, r=self.lora_rank)
+        else:
+            self.attn = Attention_lora(
+                dim, num_heads=num_heads, qkv_bias=qkv_bias, qk_scale=qk_scale, attn_drop=attn_drop, proj_drop=drop, r=self.lora_rank)
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
         self.norm2 = norm_layer(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
@@ -353,7 +400,7 @@ class VisionTransformer_lora(nn.Module):
     """ Vision Transformer """
     def __init__(self, img_size=[224], patch_size=16, in_chans=3, num_classes=0, embed_dim=384, depth=12,
                  num_heads=12, mlp_ratio=4., qkv_bias=False, qk_scale=None, drop_rate=0., attn_drop_rate=0.,
-                 drop_path_rate=0., norm_layer=nn.LayerNorm, r=4, **kwargs):
+                 drop_path_rate=0., norm_layer=nn.LayerNorm, r=4, split=False, **kwargs):
         super().__init__()
         self.lora_rank = r
         self.num_features = self.embed_dim = embed_dim
@@ -371,13 +418,13 @@ class VisionTransformer_lora(nn.Module):
         self.blocks = nn.ModuleList([
             Block_lora(
                 dim=embed_dim, num_heads=num_heads, mlp_ratio=mlp_ratio, qkv_bias=qkv_bias, qk_scale=qk_scale,
-                drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[i], norm_layer=norm_layer, r=self.lora_rank)
+                drop=drop_rate, attn_drop=attn_drop_rate, drop_path=dpr[i], norm_layer=norm_layer, r=self.lora_rank, split=split)
             for i in range(depth)])
         self.norm = norm_layer(embed_dim)
 
         # Classifier head
-        # self.head = nn.Linear(embed_dim, num_classes) if num_classes > 0 else nn.Identity()
-        self.head = lora.Linear(embed_dim, num_classes, r=self.lora_rank) if num_classes > 0 else nn.Identity()
+        self.head = nn.Linear(embed_dim, num_classes) if num_classes > 0 else nn.Identity()
+        # self.head = lora.Linear(embed_dim, num_classes, r=self.lora_rank) if num_classes > 0 else nn.Identity()
         trunc_normal_(self.pos_embed, std=.02)
         trunc_normal_(self.cls_token, std=.02)
         self.apply(self._init_weights)
@@ -385,7 +432,7 @@ class VisionTransformer_lora(nn.Module):
     def reset_parameters_lora(self):
         for b in self.blocks:
             b.reset_parameters_lora()
-        self.head.reset_parameters_lora()
+        # self.head.reset_parameters_lora()
     
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
