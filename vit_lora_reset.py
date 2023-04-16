@@ -273,7 +273,7 @@ def main(args):
         args.epochs = final_epoch - (checkpoint['epoch'] + 1)
     
     for k, v in model.state_dict().items():
-        print(k. v.shape)
+        print(k, v.shape)
     input()
     
     for epoch in tqdm(range(args.epochs)):
