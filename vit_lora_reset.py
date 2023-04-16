@@ -306,12 +306,9 @@ def main(args):
         
         writer.add_scalar("Learning Rate", lr, epoch)
         
-        # if (epoch+1) % args.reset == 0:
-        #     print(f'epoch: {epoch+1} reset')
-        #     nn.init.kaiming_uniform_(global_model.layer_input.lora_A, a=math.sqrt(5))
-        #     nn.init.zeros_(global_model.layer_input.lora_B)
-        #     nn.init.kaiming_uniform_(global_model.layer_hidden.lora_A, a=math.sqrt(5))
-        #     nn.init.zeros_(global_model.layer_hidden.lora_B)
+        if (epoch+1) % args.reset == 0:
+            print(f'epoch: {epoch+1} reset')
+            model.reset_parameters_lora()
 
         
     print(Fore.RED+'*'*80)

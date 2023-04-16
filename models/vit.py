@@ -331,6 +331,12 @@ class VisionTransformer_lora(nn.Module):
         trunc_normal_(self.cls_token, std=.02)
         self.apply(self._init_weights)
 
+    def reset_parameters_lora(self):
+        for b in self.blocks:
+            print(b)
+        input()
+        self.head.reset_parameters_lora()
+    
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
             trunc_normal_(m.weight, std=.02)
