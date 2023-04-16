@@ -272,9 +272,9 @@ def main(args):
         final_epoch = args.epochs
         args.epochs = final_epoch - (checkpoint['epoch'] + 1)
     
-    for k, v in model.state_dict().items():
-        print(k, v.shape)
-    input()
+    # for k, v in model.state_dict().items():
+    #     print(k, v.shape)
+    # input()
     
     for epoch in tqdm(range(args.epochs)):
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
@@ -306,7 +306,7 @@ def main(args):
         
         writer.add_scalar("Learning Rate", lr, epoch)
         
-        if (epoch+1) % args.reset == 0:
+        if (epoch+1) % args.lora_reset == 0:
             print(f'epoch: {epoch+1} reset')
             model.reset_parameters_lora()
 
