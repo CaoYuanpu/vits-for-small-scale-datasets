@@ -422,8 +422,8 @@ class VisionTransformer_lora(nn.Module):
         self.norm = norm_layer(embed_dim)
 
         # Classifier head
-        self.head = nn.Linear(embed_dim, num_classes) if num_classes > 0 else nn.Identity()
-        # self.head = lora.Linear(embed_dim, num_classes, r=self.lora_rank) if num_classes > 0 else nn.Identity()
+        # self.head = nn.Linear(embed_dim, num_classes) if num_classes > 0 else nn.Identity()
+        self.head = lora.Linear(embed_dim, num_classes, r=self.lora_rank) if num_classes > 0 else nn.Identity()
         trunc_normal_(self.pos_embed, std=.02)
         trunc_normal_(self.cls_token, std=.02)
         self.apply(self._init_weights)
@@ -431,7 +431,7 @@ class VisionTransformer_lora(nn.Module):
     def reset_parameters_lora(self):
         for b in self.blocks:
             b.reset_parameters_lora()
-        # self.head.reset_parameters_lora()
+        self.head.reset_parameters_lora()
     
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
