@@ -23,6 +23,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 import warnings
 warnings.filterwarnings("ignore", category=Warning)
+import loralib as lora
 
 best_acc1 = 0
 MODELS = ['vit', 'vit_lora', 'swin' , 'cait']
