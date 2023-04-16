@@ -272,7 +272,7 @@ def main(args):
         final_epoch = args.epochs
         args.epochs = final_epoch - (checkpoint['epoch'] + 1)
     
-    for k, v in model.state_dict():
+    for k, v in model.state_dict().items():
         print(k. v.shape)
     input()
     
