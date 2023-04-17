@@ -103,9 +103,17 @@ def build_scheduler(args, optimizer, n_iter_per_epoch):
     #     t_in_epochs=False,
     #     )
 
+    # lr_scheduler = CosineAnnealingWarmupRestarts(
+    #     optimizer,
+    #     first_cycle_steps=num_steps,
+    #     cycle_mult=1.,
+    #     max_lr = args.lr,
+    #     min_lr = 1e-6,
+    #     warmup_steps=warmup_steps
+    #     )
     lr_scheduler = CosineAnnealingWarmupRestarts(
         optimizer,
-        first_cycle_steps=num_steps,
+        first_cycle_steps=2*warmup_steps,
         cycle_mult=1.,
         max_lr = args.lr,
         min_lr = 1e-6,
