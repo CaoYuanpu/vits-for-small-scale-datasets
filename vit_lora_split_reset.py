@@ -257,7 +257,7 @@ def main(args):
         Training
     '''
     
-    lora.mark_only_lora_as_trainable(model, bias='all')
+    lora.mark_only_lora_as_trainable(model)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = build_scheduler(args, optimizer, len(train_loader))
     
