@@ -116,6 +116,8 @@ def init_parser():
     parser.add_argument('--vit_mlp_ratio', default=2, type=int, help='MLP layers in the transformer encoder')
     
     parser.add_argument('--lora_rank', default=4, type=int, help='LoRA rank')
+    
+    parser.add_argument('--opt', default='AdamW', choices=['AdamW', 'SGD'], type=str, help='optimizer')
 
     return parser
 
@@ -251,7 +253,11 @@ def main(args):
     '''
     
     lora.mark_only_lora_as_trainable(model, bias='all')
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    if args.opt == 'AdamW':
+        optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+    elif args.opt == 'SGD':
+        optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
+
     scheduler = build_scheduler(args, optimizer, len(train_loader))
     
     #summary(model, (3, data_info['img_size'], data_info['img_size']))
@@ -272,7 +278,10 @@ def main(args):
     
     
     for epoch in tqdm(range(args.epochs)):
-        lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
+        if args.opt != 'SGD':
+            lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
+        else:
+            lr = train(train_loader, model, criterion, optimizer, epoch, None, args)
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
         torch.save({
             'model_state_dict': model.state_dict(),
@@ -281,7 +290,7 @@ def main(args):
             'scheduler': scheduler.state_dict(), 
             }, 
             os.path.join(save_path, 'checkpoint.pth'))
-        
+
         logger_dict.print()
         
         if acc1 > best_acc1:
@@ -294,14 +303,14 @@ def main(args):
                     'optimizer_state_dict': optimizer.state_dict(),
                     'scheduler': scheduler.state_dict(),
                 }, os.path.join(save_path, 'best.pth'))         
-        
+
         print(f'Best acc1 {best_acc1:.2f}')
         print('*'*80)
         print(Style.RESET_ALL)        
-        
+
         writer.add_scalar("Learning Rate", lr, epoch)
         
-        
+
     print(Fore.RED+'*'*80)
     logger.debug(f'best top-1: {best_acc1:.2f}, final top-1: {acc1:.2f}')
     print('*'*80+Style.RESET_ALL)
@@ -394,7 +403,8 @@ def train(train_loader, model, criterion, optimizer, epoch, scheduler,  args):
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        scheduler.step()
+        if scheduler:
+            scheduler.step()
         lr = optimizer.param_groups[0]["lr"]
 
         if args.print_freq >= 0 and i % args.print_freq == 0:
@@ -476,7 +486,7 @@ if __name__ == '__main__':
         print("lsa present")
         model_name += "-LSA"
         
-    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}]-Seed{args.seed}"
+    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}]-Seed{args.seed}-Opt{args.opt}"
     save_path = os.path.join(os.getcwd(), 'save_finetuned', model_name)
     if save_path:
         os.makedirs(save_path, exist_ok=True)
