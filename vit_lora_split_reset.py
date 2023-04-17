@@ -256,7 +256,7 @@ def main(args):
     '''
         Training
     '''
-    
+
     lora.mark_only_lora_as_trainable(model)
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = build_scheduler(args, optimizer, len(train_loader))
@@ -277,7 +277,7 @@ def main(args):
         final_epoch = args.epochs
         args.epochs = final_epoch - (checkpoint['epoch'] + 1)
     
-    
+
     for epoch in tqdm(range(args.epochs)):
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
@@ -290,7 +290,11 @@ def main(args):
             os.path.join(save_path, 'checkpoint.pth'))
         
         logger_dict.print()
-        
+
+        if (epoch+1) % args.lora_reset == 0 or acc1 < best_acc1:
+            print(f'epoch: {epoch+1} reset')
+            model.reset_parameters_lora()
+
         if acc1 > best_acc1:
             print('* Best model upate *')
             best_acc1 = acc1
@@ -307,10 +311,7 @@ def main(args):
         print(Style.RESET_ALL)        
         
         writer.add_scalar("Learning Rate", lr, epoch)
-        
-        if (epoch+1) % args.lora_reset == 0:
-            print(f'epoch: {epoch+1} reset')
-            model.reset_parameters_lora()
+
 
     print(Fore.RED+'*'*80)
     logger.debug(f'best top-1: {best_acc1:.2f}, final top-1: {acc1:.2f}')
