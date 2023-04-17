@@ -255,10 +255,9 @@ def main(args):
     lora.mark_only_lora_as_trainable(model, bias='all')
     if args.opt == 'AdamW':
         optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+        scheduler = build_scheduler(args, optimizer, len(train_loader))
     elif args.opt == 'SGD':
         optimizer = torch.optim.SGD(model.parameters(), lr=args.lr)
-
-    scheduler = build_scheduler(args, optimizer, len(train_loader))
     
     #summary(model, (3, data_info['img_size'], data_info['img_size']))
 
@@ -272,7 +271,8 @@ def main(args):
         checkpoint = torch.load(args.resume)
         model.load_state_dict(checkpoint['model_state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-        scheduler.load_state_dict(checkpoint['scheduler'])
+        if args.opt != 'SGD':
+            scheduler.load_state_dict(checkpoint['scheduler'])
         final_epoch = args.epochs
         args.epochs = final_epoch - (checkpoint['epoch'] + 1)
     
@@ -283,26 +283,43 @@ def main(args):
         else:
             lr = train(train_loader, model, criterion, optimizer, epoch, None, args)
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
-        torch.save({
-            'model_state_dict': model.state_dict(),
-            'epoch': epoch,
-            'optimizer_state_dict': optimizer.state_dict(),
-            'scheduler': scheduler.state_dict(), 
-            }, 
-            os.path.join(save_path, 'checkpoint.pth'))
-
+        if args.opt != 'SGD':
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'epoch': epoch,
+                'optimizer_state_dict': optimizer.state_dict(),
+                'scheduler': scheduler.state_dict(), 
+                }, 
+                os.path.join(save_path, 'checkpoint.pth'))
+        else:
+            torch.save({
+                'model_state_dict': model.state_dict(),
+                'epoch': epoch,
+                'optimizer_state_dict': optimizer.state_dict(),
+                }, 
+                os.path.join(save_path, 'checkpoint.pth'))
+ 
         logger_dict.print()
         
         if acc1 > best_acc1:
             print('* Best model upate *')
             best_acc1 = acc1
             
-            torch.save({
-                    'model_state_dict': model.state_dict(),
-                    'epoch': epoch,
-                    'optimizer_state_dict': optimizer.state_dict(),
-                    'scheduler': scheduler.state_dict(),
-                }, os.path.join(save_path, 'best.pth'))         
+            if args.opt != 'SGD':
+                torch.save({
+                        'model_state_dict': model.state_dict(),
+                        'epoch': epoch,
+                        'optimizer_state_dict': optimizer.state_dict(),
+                        'scheduler': scheduler.state_dict(),
+                    }, os.path.join(save_path, 'best.pth'))  
+            else:
+                torch.save({
+                        'model_state_dict': model.state_dict(),
+                        'epoch': epoch,
+                        'optimizer_state_dict': optimizer.state_dict(),
+                    }, os.path.join(save_path, 'best.pth'))  
+                
+       
 
         print(f'Best acc1 {best_acc1:.2f}')
         print('*'*80)
