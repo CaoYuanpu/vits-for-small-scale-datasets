@@ -136,6 +136,11 @@ def main(args):
     print(Fore.GREEN+'*'*80)
     logger.debug(f"Creating model: {model_name}")    
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    
+    for n, p in model.named_parameters():
+        print(n, p.shape, p.requires_grad)
+    input()
+    
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
     logger.debug(f'Initial learning rate: {args.lr:.6f}')
     logger.debug(f"Start training for {args.epochs} epochs")
