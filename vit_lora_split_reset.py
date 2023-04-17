@@ -137,9 +137,9 @@ def main(args):
     logger.debug(f"Creating model: {model_name}")    
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     
-    for n, p in model.named_parameters():
-        print(n, p.shape, p.requires_grad)
-    input()
+    # for n, p in model.named_parameters():
+    #     print(n, p.shape, p.requires_grad)
+    # input()
     
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
     logger.debug(f'Initial learning rate: {args.lr:.6f}')
@@ -277,6 +277,7 @@ def main(args):
         final_epoch = args.epochs
         args.epochs = final_epoch - (checkpoint['epoch'] + 1)
     
+    last_rest_epoch = 0
 
     for epoch in tqdm(range(args.epochs)):
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
@@ -291,9 +292,10 @@ def main(args):
         
         logger_dict.print()
 
-        if (epoch+1) % args.lora_reset == 0 or acc1 < best_acc1:
+        if (epoch+1) - last_rest_epoch == args.lora_reset or acc1 < best_acc1:
             print(f'epoch: {epoch+1} reset')
             model.reset_parameters_lora()
+            last_rest_epoch = epoch + 1
 
         if acc1 > best_acc1:
             print('* Best model upate *')
