@@ -140,7 +140,7 @@ def main(args):
     # for n, p in model.named_parameters():
     #     print(n, p.shape, p.requires_grad)
     # input()
-    
+
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
     logger.debug(f'Initial learning rate: {args.lr:.6f}')
     logger.debug(f"Start training for {args.epochs} epochs")
@@ -243,7 +243,7 @@ def main(args):
             RandomErasing(probability = args.re, sh = args.re_sh, r1 = args.re_r1, mean=data_info['stat'][0])
             ]
     
-    
+
     augmentations = transforms.Compose(augmentations)
       
     train_dataset, val_dataset = dataload(args, augmentations, normalize, data_info)
@@ -277,7 +277,6 @@ def main(args):
         final_epoch = args.epochs
         args.epochs = final_epoch - (checkpoint['epoch'] + 1)
     
-    last_rest_epoch = 0
 
     for epoch in tqdm(range(args.epochs)):
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
@@ -289,13 +288,13 @@ def main(args):
             'scheduler': scheduler.state_dict(), 
             }, 
             os.path.join(save_path, 'checkpoint.pth'))
-        
+
         logger_dict.print()
 
-        if (epoch+1) - last_rest_epoch == args.lora_reset or acc1 < best_acc1:
+        if ((epoch+1) > 10 and (epoch+1) % args.lora_reset == 0) or ((epoch+1) == 10):
             print(f'epoch: {epoch+1} reset')
             model.reset_parameters_lora()
-            last_rest_epoch = epoch + 1
+
 
         if acc1 > best_acc1:
             print('* Best model upate *')
