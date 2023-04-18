@@ -314,7 +314,7 @@ def main(args):
 
         logger_dict.print()
 
-        if ((epoch+1) > 10 and (epoch+1) % args.lora_reset == 0) or ((epoch+1) == 10):
+        if (epoch+1) % args.lora_reset == 0:
             print(f'epoch: {epoch+1} reset')
             model.reset_parameters_lora()
 

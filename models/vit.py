@@ -291,6 +291,7 @@ class Block_lora(nn.Module):
 
     def reset_parameters_lora(self):
         self.attn.reset_parameters_lora()
+        self.mlp.reset_parameters_lora()
         
 
 class PatchEmbed(nn.Module):
