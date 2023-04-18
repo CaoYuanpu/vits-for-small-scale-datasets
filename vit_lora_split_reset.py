@@ -275,8 +275,10 @@ def main(args):
         Training
     '''
     if not args.bias:
+        logger.debug('Training without bias')
         mark_only_lora_as_trainable(model)
     else:
+        ogger.debug('Training with bias')
         mark_only_lora_as_trainable(model, bias='all')
 
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
@@ -515,7 +517,7 @@ if __name__ == '__main__':
         print("lsa present")
         model_name += "-LSA"
 
-    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}]-Seed{args.seed}-Rank{args.lora_rank}-Bias{args.bias}-Reset{args.lora_reset}"
+    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}]-Seed{args.seed}-Rank{args.lora_rank}-Bias{args.bias}-OptCosAnnealWR-Reset{args.lora_reset}"
     save_path = os.path.join(os.getcwd(), 'save_finetuned', model_name)
     if save_path:
         os.makedirs(save_path, exist_ok=True)
