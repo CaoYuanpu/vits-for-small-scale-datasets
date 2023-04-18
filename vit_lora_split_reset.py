@@ -40,7 +40,7 @@ def mark_only_lora_as_trainable(model: nn.Module, bias: str = 'none') -> None:
         return
     elif bias == 'all':
         for n, p in model.named_parameters():
-            if 'bias' in n:
+            if 'bias' in n and 'attn' not in n:
                 p.requires_grad = True
     elif bias == 'lora_only':
         for m in model.modules():
@@ -140,6 +140,8 @@ def init_parser():
     parser.add_argument('--lora_rank', default=4, type=int, help='LoRA rank')
 
     parser.add_argument('--lora_reset', default=1, type=int, help='LoRA reset')
+    
+    parser.add_argument('--bias', action='store_true', help='bias')
     
     return parser
 
@@ -272,8 +274,10 @@ def main(args):
     '''
         Training
     '''
-
-    mark_only_lora_as_trainable(model)
+    if not args.bias:
+        mark_only_lora_as_trainable(model)
+    else:
+        mark_only_lora_as_trainable(model, bias='all')
 
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     
@@ -511,7 +515,7 @@ if __name__ == '__main__':
         print("lsa present")
         model_name += "-LSA"
 
-    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}]-Seed{args.seed}-Rank{args.lora_rank}-Reset{args.lora_reset}-Cycle1"
+    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}]-Seed{args.seed}-Rank{args.lora_rank}-Bias{args.bias}-Reset{args.lora_reset}"
     save_path = os.path.join(os.getcwd(), 'save_finetuned', model_name)
     if save_path:
         os.makedirs(save_path, exist_ok=True)
