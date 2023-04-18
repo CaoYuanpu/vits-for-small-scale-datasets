@@ -280,7 +280,7 @@ def main(args):
     for n, p in model.named_parameters():
         print(n, p.shape, p.requires_grad)
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
-    input()
+
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = build_scheduler(args, optimizer, len(train_loader))
 
