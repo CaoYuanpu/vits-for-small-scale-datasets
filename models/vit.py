@@ -66,6 +66,30 @@ class Mlp(nn.Module):
         x = self.drop(x)
         return x
 
+class Mlp_lora(nn.Module):
+    def __init__(self, in_features, hidden_features=None, out_features=None, act_layer=nn.GELU, drop=0., r=4):
+        super().__init__()
+        self.lora_rank = r
+        out_features = out_features or in_features
+        hidden_features = hidden_features or in_features
+        # self.fc1 = nn.Linear(in_features, hidden_features)
+        self.fc1 = lora.Linear(in_features, hidden_features, r=self.lora_rank)
+        self.act = act_layer()
+        # self.fc2 = nn.Linear(hidden_features, out_features)
+        self.fc2 = lora.Linear(hidden_features, out_features, r=self.lora_rank)
+        self.drop = nn.Dropout(drop)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = self.act(x)
+        x = self.drop(x)
+        x = self.fc2(x)
+        x = self.drop(x)
+        return x
+
+    def reset_parameters_lora(self):
+        self.fc1.reset_parameters_lora()
+        self.fc2.reset_parameters_lora()
 
 class Attention(nn.Module):
     def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
@@ -255,7 +279,7 @@ class Block_lora(nn.Module):
         self.drop_path = DropPath(drop_path) if drop_path > 0. else nn.Identity()
         self.norm2 = norm_layer(dim)
         mlp_hidden_dim = int(dim * mlp_ratio)
-        self.mlp = Mlp(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop)
+        self.mlp = Mlp_lora(in_features=dim, hidden_features=mlp_hidden_dim, act_layer=act_layer, drop=drop, r=self.lora_rank)
 
     def forward(self, x, return_attention=False):
         y, attn = self.attn(self.norm1(x))
