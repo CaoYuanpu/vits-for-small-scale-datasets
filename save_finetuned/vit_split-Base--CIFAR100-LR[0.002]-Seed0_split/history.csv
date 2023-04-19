@@ -1,0 +1,50 @@
+CIFAR100
+Creating model: vit_split-Base--CIFAR100-LR[0.002]-Seed0_split
+Number of params: 2,709,796
+Initial learning rate: 0.002000
+Start training for 300 epochs
+label smoothing used
+Stochastic depth(0.1) used 
+Cutmix used
+Mixup used
+Repeated Aug(3) used
+Autoaugmentation used
+Random erasing(0.25) used 
+CIFAR100
+Creating model: vit_split-Base--CIFAR100-LR[0.002]-Seed0_split
+Number of params: 2,709,796
+Initial learning rate: 0.002000
+Start training for 300 epochs
+label smoothing used
+Stochastic depth(0.1) used 
+Cutmix used
+Mixup used
+Repeated Aug(3) used
+Autoaugmentation used
+Random erasing(0.25) used 
+CIFAR100
+Creating model: vit_split-Base--CIFAR100-LR[0.002]-Seed0_split
+Number of params: 2,709,796
+Initial learning rate: 0.002000
+Start training for 100 epochs
+label smoothing used
+Stochastic depth(0.1) used 
+Cutmix used
+Mixup used
+Repeated Aug(3) used
+Autoaugmentation used
+Random erasing(0.25) used 
+best top-1: 73.28, final top-1: 73.03
+CIFAR100
+Creating model: vit_split-Base--CIFAR100-LR[0.002]-Seed0_split
+Number of params: 2,709,796
+Initial learning rate: 0.002000
+Start training for 400 epochs
+label smoothing used
+Stochastic depth(0.1) used 
+Cutmix used
+Mixup used
+Repeated Aug(3) used
+Autoaugmentation used
+Random erasing(0.25) used 
+best top-1: 77.45, final top-1: 77.24
