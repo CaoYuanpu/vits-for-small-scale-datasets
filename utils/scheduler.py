@@ -91,7 +91,7 @@ class CosineAnnealingWarmupRestarts(_LRScheduler):
 def build_scheduler(args, optimizer, n_iter_per_epoch):
     num_steps = int(args.epochs * n_iter_per_epoch)
     warmup_steps = int(args.warmup * n_iter_per_epoch)
-
+    if 'lora' not in args.arch:
     # lr_scheduler = CosineLRScheduler(
     #     optimizer,
     #     t_initial=num_steps,
@@ -102,15 +102,15 @@ def build_scheduler(args, optimizer, n_iter_per_epoch):
     #     cycle_limit=1,
     #     t_in_epochs=False,
     #     )
-
-    # lr_scheduler = CosineAnnealingWarmupRestarts(
-    #     optimizer,
-    #     first_cycle_steps=num_steps,
-    #     cycle_mult=1.,
-    #     max_lr = args.lr,
-    #     min_lr = 1e-6,
-    #     warmup_steps=warmup_steps
-    #     )
+        print('non-lora scheduler')
+        lr_scheduler = CosineAnnealingWarmupRestarts(
+            optimizer,
+            first_cycle_steps=num_steps,
+            cycle_mult=1.,
+            max_lr = args.lr,
+            min_lr = 1e-6,
+            warmup_steps=warmup_steps
+            )
     # lr_scheduler = CosineAnnealingWarmupRestarts(
     #     optimizer,
     #     first_cycle_steps=2*warmup_steps,
@@ -119,7 +119,7 @@ def build_scheduler(args, optimizer, n_iter_per_epoch):
     #     min_lr = 1e-6,
     #     warmup_steps=warmup_steps
     #     )
-
-    lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=n_iter_per_epoch, T_mult=1, eta_min=1e-6, last_epoch=-1)
+    else:
+        lr_scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=n_iter_per_epoch, T_mult=1, eta_min=1e-6, last_epoch=-1)
 
     return lr_scheduler
