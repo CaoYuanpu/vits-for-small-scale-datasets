@@ -288,8 +288,6 @@ def main(args):
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    print(optimizer.param_groups)
-    input()
     scheduler = build_scheduler(args, optimizer, len(train_loader))
 
     #summary(model, (3, data_info['img_size'], data_info['img_size']))
@@ -331,13 +329,14 @@ def main(args):
             input()
 
         if (epoch+1) % args.lora_reset == 0:
-            # cur_rank = random.choice([7, 8, 9, 10])
-            # while cur_rank == rank:
-            #     cur_rank = random.choice([7, 8, 9, 10])
-            # rank = cur_rank
+            cur_rank = random.choice([7, 8, 9, 10])
+            while cur_rank == rank:
+                cur_rank = random.choice([7, 8, 9, 10])
+            rank = cur_rank
             print(f'epoch: {epoch+1} reset with rank {rank}')
             model.reset_parameters_lora(r=rank)
-        
+            optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
+            scheduler = build_scheduler(args, optimizer, len(train_loader))
             print(model.blocks[0].attn.q.lora_A.shape)
             print(model.blocks[0].attn.q.lora_A)
             input()
