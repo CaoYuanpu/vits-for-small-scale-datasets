@@ -331,7 +331,7 @@ def main(args):
             model.reset_parameters_lora(r=rank)
         
         print(model.blocks[0].attn.q.lora_A.shape)
-        print(model.blocks[0].attn.q.lora_A.shape)
+        print(model.blocks[0].attn.q.lora_A)
         input()
 
         if acc1 > best_acc1:
