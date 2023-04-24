@@ -287,9 +287,6 @@ def main(args):
         print(n, p.shape, p.requires_grad)
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
 
-    print(lora.lora_state_dict(model).keys())
-    input()
-
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = build_scheduler(args, optimizer, len(train_loader))
 
@@ -325,6 +322,7 @@ def main(args):
 
         if (epoch+1) % args.lora_reset == 0:
             print(f'epoch: {epoch+1} reset')
+            torch.save(lora.lora_state_dict(model), os.path.join(save_path, f'lora_cp_epoch{epoch+1}.pth'))
             model.reset_parameters_lora(r=args.lora_rank)
 
 
