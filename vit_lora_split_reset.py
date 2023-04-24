@@ -287,7 +287,7 @@ def main(args):
         print(n, p.shape, p.requires_grad)
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
 
-    print(lora.lora_state_dict(model))
+    print(lora.lora_state_dict(model).keys())
     input()
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
