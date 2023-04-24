@@ -322,6 +322,12 @@ def main(args):
 
         logger_dict.print()
 
+        if epoch > 0:
+            print(model.blocks[0].attn.q.lora_A.shape)
+            print(model.blocks[0].attn.q.lora_A)
+            print('------------')
+            input()
+
         if (epoch+1) % args.lora_reset == 0:
             cur_rank = random.choice([7, 8, 9, 10])
             while cur_rank == rank:
@@ -330,9 +336,9 @@ def main(args):
             print(f'epoch: {epoch+1} reset with rank {rank}')
             model.reset_parameters_lora(r=rank)
         
-        print(model.blocks[0].attn.q.lora_A.shape)
-        print(model.blocks[0].attn.q.lora_A)
-        input()
+            print(model.blocks[0].attn.q.lora_A.shape)
+            print(model.blocks[0].attn.q.lora_A)
+            input()
 
         if acc1 > best_acc1:
             print('* Best model upate *')
