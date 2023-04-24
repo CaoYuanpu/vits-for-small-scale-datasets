@@ -288,8 +288,8 @@ def main(args):
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
 
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-    # print(optimizer.param_groups)
-    # input()
+    print(optimizer.param_groups)
+    input()
     scheduler = build_scheduler(args, optimizer, len(train_loader))
 
     #summary(model, (3, data_info['img_size'], data_info['img_size']))
