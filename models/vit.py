@@ -87,9 +87,10 @@ class Mlp_lora(nn.Module):
         x = self.drop(x)
         return x
 
-    def reset_parameters_lora(self):
-        self.fc1.reset_parameters_lora()
-        self.fc2.reset_parameters_lora()
+    def reset_parameters_lora(self, r):
+        self.lora_rank = r
+        self.fc1.reset_parameters_lora(r)
+        self.fc2.reset_parameters_lora(r)
 
 class Attention(nn.Module):
     def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0.):
@@ -191,9 +192,10 @@ class Attention_lora(nn.Module):
         x = self.proj_drop(x)
         return x, attn
 
-    def reset_parameters_lora(self):
-        self.qkv.reset_parameters_lora()
-        self.proj.reset_parameters_lora()
+    def reset_parameters_lora(self, r):
+        self.lora_rank = r
+        self.qkv.reset_parameters_lora(r)
+        self.proj.reset_parameters_lora(r)
 
 class Attention_lora_split(nn.Module):
     def __init__(self, dim, num_heads=8, qkv_bias=False, qk_scale=None, attn_drop=0., proj_drop=0., r=4):
@@ -233,11 +235,12 @@ class Attention_lora_split(nn.Module):
         x = self.proj_drop(x)
         return x, attn
 
-    def reset_parameters_lora(self):
-        self.q.reset_parameters_lora()
-        self.k.reset_parameters_lora()
-        self.v.reset_parameters_lora()
-        self.proj.reset_parameters_lora()
+    def reset_parameters_lora(self, r):
+        self.lora_rank = r
+        self.q.reset_parameters_lora(r)
+        self.k.reset_parameters_lora(r)
+        self.v.reset_parameters_lora(r)
+        self.proj.reset_parameters_lora(r)
 
 
 class Block(nn.Module):
@@ -289,9 +292,10 @@ class Block_lora(nn.Module):
         x = x + self.drop_path(self.mlp(self.norm2(x)))
         return x
 
-    def reset_parameters_lora(self):
-        self.attn.reset_parameters_lora()
-        self.mlp.reset_parameters_lora()
+    def reset_parameters_lora(self, r):
+        self.lora_rank = r
+        self.attn.reset_parameters_lora(r)
+        self.mlp.reset_parameters_lora(r)
         
 
 class PatchEmbed(nn.Module):
@@ -453,10 +457,11 @@ class VisionTransformer_lora(nn.Module):
         trunc_normal_(self.cls_token, std=.02)
         self.apply(self._init_weights)
 
-    def reset_parameters_lora(self):
+    def reset_parameters_lora(self, r):
+        self.lora_rank = r
         for b in self.blocks:
-            b.reset_parameters_lora()
-        self.head.reset_parameters_lora()
+            b.reset_parameters_lora(r)
+        self.head.reset_parameters_lora(r)
     
     def _init_weights(self, m):
         if isinstance(m, nn.Linear):
