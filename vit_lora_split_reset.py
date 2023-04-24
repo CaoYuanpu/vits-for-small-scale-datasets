@@ -322,7 +322,7 @@ def main(args):
 
         if (epoch+1) % args.lora_reset == 0:
             print(f'epoch: {epoch+1} reset')
-            model.reset_parameters_lora()
+            model.reset_parameters_lora(r=args.lora_rank)
 
 
         if acc1 > best_acc1:
@@ -521,7 +521,7 @@ if __name__ == '__main__':
     save_path = os.path.join(os.getcwd(), 'save_finetuned', model_name)
     if save_path:
         os.makedirs(save_path, exist_ok=True)
-        
+
     writer = SummaryWriter(os.path.join(os.getcwd(), 'tensorboard', model_name))
     
     # logger
