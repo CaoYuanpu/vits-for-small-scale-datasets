@@ -51,3 +51,4 @@ Autoaugmentation used
 Random erasing(0.25) used 
 Training without bias
 Number of params: 225,056
+best top-1: 65.59, final top-1: 65.22
