@@ -302,7 +302,6 @@ def main(args):
     # print(full_rank_dict.keys())
     
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
-    input()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = build_scheduler(args, optimizer, len(train_loader))
 
@@ -329,7 +328,7 @@ def main(args):
         
         name = full_rank_names[epoch % len(full_rank_paras)]
         print(f'Full-rank training: {name}')
-        
+        input()
         
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
@@ -389,14 +388,10 @@ def train(train_loader, model, criterion, optimizer, epoch, scheduler,  args):
                 slicing_idx, y_a, y_b, lam, sliced = cutmix_data(images, target, args)
                 images[:, :, slicing_idx[0]:slicing_idx[2], slicing_idx[1]:slicing_idx[3]] = sliced
                 output = model(images)
-                loss =  mixup_criterion(criterion, output, y_a, y_b, lam)
-                
-                   
+                loss =  mixup_criterion(criterion, output, y_a, y_b, lam) 
             else:
                 output = model(images)
-                
-                loss = criterion(output, target)
-                               
+                loss = criterion(output, target)      
                 
         # Mixup only
         elif not args.cm and args.mu:
@@ -404,10 +399,7 @@ def train(train_loader, model, criterion, optimizer, epoch, scheduler,  args):
             if r < args.mix_prob:
                 images, y_a, y_b, lam = mixup_data(images, target, args)
                 output = model(images)
-                
                 loss =  mixup_criterion(criterion, output, y_a, y_b, lam)
-                
-                
             
             else:
                 output = model(images)
