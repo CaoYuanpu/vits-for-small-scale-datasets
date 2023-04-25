@@ -346,7 +346,7 @@ def main(args):
         print(weight[0])
         print(lora_A[0])
         print(lora_B[0])
-
+        input()
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
         torch.save({
             'model_state_dict': model.state_dict(),
