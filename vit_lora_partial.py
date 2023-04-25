@@ -299,7 +299,7 @@ def main(args):
     print('full_rank_names:')
     print(full_rank_names)
     print('full_rank_dict:')
-    print(full_rank_dict)
+    print(full_rank_dict.keys())
     
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
     input()
