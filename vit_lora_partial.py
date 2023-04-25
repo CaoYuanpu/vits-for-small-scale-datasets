@@ -326,7 +326,7 @@ def main(args):
     
     for epoch in tqdm(range(args.epochs)):
         
-        name = full_rank_names[epoch % len(full_rank_paras)]
+        name = full_rank_names[epoch % len(full_rank_names)]
         print(f'Full-rank training: {name}')
         input()
         
