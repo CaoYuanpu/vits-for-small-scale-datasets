@@ -296,10 +296,10 @@ def main(args):
         if head in full_rank_names:
             full_rank_dict[n] = p
     
-    print('full_rank_names:')
+    print(f'full_rank_names: {len(full_rank_names)}')
     print(full_rank_names)
-    print('full_rank_dict:')
-    print(full_rank_dict.keys())
+    print(f'full_rank_dict: {len(full_rank_dict.keys())}')
+    # print(full_rank_dict.keys())
     
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
     input()
