@@ -354,6 +354,9 @@ def main(args):
         weight.requires_grad = False
         lora_A.requires_grad = True
         lora_B.requires_grad = True
+        for n, p in model.named_parameters():
+            if name in n:
+                print(n, p.shape, p.requires_grad)
         print(f'weight {weight.shape} {weight.requires_grad},  lora_A {lora_A.shape} {lora_A.requires_grad}, lora_B {lora_B.shape} {lora_B.requires_grad}')
         
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
