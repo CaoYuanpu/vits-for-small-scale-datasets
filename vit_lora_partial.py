@@ -342,6 +342,11 @@ def main(args):
         input()
         
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
+
+        print(weight[0])
+        print(lora_A[0])
+        print(lora_B[0])
+
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
         torch.save({
             'model_state_dict': model.state_dict(),
