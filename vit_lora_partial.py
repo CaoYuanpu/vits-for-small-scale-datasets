@@ -324,6 +324,10 @@ def main(args):
     rank = args.lora_rank
     print(f"Initial rank: {rank}")
     
+    pre_weight = None
+    pre_lora_A = None
+    pre_lora_B = None
+
     for epoch in tqdm(range(args.epochs)):
         
         name = full_rank_names[epoch % len(full_rank_names)]
@@ -331,41 +335,38 @@ def main(args):
         lora_A = full_rank_dict[name+'.lora_A']
         lora_B = full_rank_dict[name+'.lora_B']
         print(f'Full-rank training: {name}')
-        print(f'weight {weight.shape} {weight.requires_grad},  lora_A {lora_A.shape} {lora_A.requires_grad}, lora_B {lora_B.shape} {lora_B.requires_grad}')
         weight.requires_grad = True
         lora_A.requires_grad = False
         lora_B.requires_grad = False
         optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         scheduler = build_scheduler(args, optimizer, len(train_loader))
-        for n, p in model.named_parameters():
-            if name in n:
-                print(n, p.shape, p.requires_grad)
-    
         print(f'weight {weight.shape} {weight.requires_grad},  lora_A {lora_A.shape} {lora_A.requires_grad}, lora_B {lora_B.shape} {lora_B.requires_grad}')
         print(weight[0][:10])
         print(lora_A[0][:10])
         print(lora_B[0])
-        input()
         
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
-        
-        for n, p in model.named_parameters():
-            if name in n:
-                print(n, p.shape, p.requires_grad)
-        print(f'weight {weight.shape} {weight.requires_grad},  lora_A {lora_A.shape} {lora_A.requires_grad}, lora_B {lora_B.shape} {lora_B.requires_grad}')
+
+        if pre_weight is not None:
+            print(f'pre weight {pre_weight.shape} {pre_weight.requires_grad},  pre lora_A {pre_lora_A.shape} {pre_lora_A.requires_grad}, pre lora_B {pre_lora_B.shape} {pre_lora_B.requires_grad}')
+            print(pre_weight[0][:10])
+            print(pre_lora_A[0][:10])
+            print(pre_lora_B[0])
+            input()
+
+        pre_weight = weight
+        pre_lora_A = lora_A
+        pre_lora_B = lora_B
         
         print(weight[0][:10])
         print(lora_A[0][:10])
         print(lora_B[0])
-        input()
         weight.requires_grad = False
         lora_A.requires_grad = True
         lora_B.requires_grad = True
-        for n, p in model.named_parameters():
-            if name in n:
-                print(n, p.shape, p.requires_grad)
         print(f'weight {weight.shape} {weight.requires_grad},  lora_A {lora_A.shape} {lora_A.requires_grad}, lora_B {lora_B.shape} {lora_B.requires_grad}')
         input()
+        
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
         torch.save({
             'model_state_dict': model.state_dict(),
