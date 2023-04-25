@@ -567,7 +567,7 @@ if __name__ == '__main__':
         print("lsa present")
         model_name += "-LSA"
 
-    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}]-Seed{args.seed}-Bias{args.bias}-OptCosAnnealWR-Reset{args.lora_reset}_partial"
+    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}-WD{args.weight_decay}]-Seed{args.seed}-Bias{args.bias}-OptCosAnnealWR-Reset{args.lora_reset}_partial"
     save_path = os.path.join(os.getcwd(), 'save_finetuned', model_name)
     if save_path:
         os.makedirs(save_path, exist_ok=True)
