@@ -332,6 +332,10 @@ def main(args):
         lora_B = full_rank_dict[name+'.lora_B']
         print(f'Full-rank training: {name}')
         print(f'weight {weight.shape} {weight.requires_grad},  lora_A {lora_A.shape} {lora_A.requires_grad}, lora_B {lora_B.shape} {lora_B.requires_grad}')
+        weight.requires_grad = True
+        lora_A.requires_grad = False
+        lora_B.requires_grad = False
+        print(f'weight {weight.shape} {weight.requires_grad},  lora_A {lora_A.shape} {lora_A.requires_grad}, lora_B {lora_B.shape} {lora_B.requires_grad}')
         input()
         
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
