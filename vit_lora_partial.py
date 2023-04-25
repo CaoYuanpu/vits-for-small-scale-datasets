@@ -288,7 +288,7 @@ def main(args):
     for n, p in model.named_parameters():
         print(n, p.shape, p.requires_grad)
         if 'lora_A' in n:
-            full_rank_paras.append(n[:-7])
+            full_rank_names.append(n[:-7])
             
     full_rank_dict = {}
     for n, p in model.named_parameters():
