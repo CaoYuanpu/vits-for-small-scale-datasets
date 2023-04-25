@@ -283,9 +283,14 @@ def main(args):
 
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     
+    full_rank_paras = []
+    
     for n, p in model.named_parameters():
         print(n, p.shape, p.requires_grad)
+        if 'lora_A' in n:
+            full_rank_paras.append(n[:-7])
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
+    print(full_rank_paras)
     input()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = build_scheduler(args, optimizer, len(train_loader))
@@ -321,12 +326,6 @@ def main(args):
             os.path.join(save_path, 'checkpoint.pth'))
 
         logger_dict.print()
-
-        # if epoch > 0:
-        #     print(model.blocks[0].attn.q.lora_A.shape)
-        #     print(model.blocks[0].attn.q.lora_A)
-        #     print('------------')
-        #     input()
 
         if (epoch+1) % args.lora_reset == 0:
             cur_rank = random.choice([7, 8, 9, 10])
