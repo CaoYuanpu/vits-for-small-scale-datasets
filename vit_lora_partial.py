@@ -278,19 +278,30 @@ def main(args):
         logger.debug('Training without bias')
         mark_only_lora_as_trainable(model)
     else:
-        ogger.debug('Training with bias')
+        logger.debug('Training with bias')
         mark_only_lora_as_trainable(model, bias='all')
 
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     
-    full_rank_paras = []
+    full_rank_names = []
     
     for n, p in model.named_parameters():
         print(n, p.shape, p.requires_grad)
         if 'lora_A' in n:
             full_rank_paras.append(n[:-7])
+            
+    full_rank_dict = {}
+    for n, p in model.named_parameters():
+        head = '.'.join(n.split('.')[:-1])
+        if head in full_rank_names:
+            full_rank_dict[n] = p
+    
+    print('full_rank_names:')
+    print(full_rank_names)
+    print('full_rank_dict:')
+    print(full_rank_dict)
+    
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
-    print(full_rank_paras)
     input()
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = build_scheduler(args, optimizer, len(train_loader))
@@ -315,6 +326,11 @@ def main(args):
     print(f"Initial rank: {rank}")
     
     for epoch in tqdm(range(args.epochs)):
+        
+        name = full_rank_names[epoch % len(full_rank_paras)]
+        print(f'Full-rank training: {name}')
+        
+        
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
         torch.save({
@@ -328,17 +344,8 @@ def main(args):
         logger_dict.print()
 
         if (epoch+1) % args.lora_reset == 0:
-            cur_rank = random.choice([7, 8, 9, 10])
-            while cur_rank == rank:
-                cur_rank = random.choice([7, 8, 9, 10])
-            rank = cur_rank
             print(f'epoch: {epoch+1} reset with rank {rank}')
             model.reset_parameters_lora(r=rank)
-            optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
-            scheduler = build_scheduler(args, optimizer, len(train_loader))
-            # print(model.blocks[0].attn.q.lora_A.shape)
-            # print(model.blocks[0].attn.q.lora_A)
-            # input()
 
         if acc1 > best_acc1:
             print('* Best model upate *')
