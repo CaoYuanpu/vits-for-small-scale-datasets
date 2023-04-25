@@ -336,17 +336,21 @@ def main(args):
         lora_A.requires_grad = False
         lora_B.requires_grad = False
         print(f'weight {weight.shape} {weight.requires_grad},  lora_A {lora_A.shape} {lora_A.requires_grad}, lora_B {lora_B.shape} {lora_B.requires_grad}')
-        print(weight[0])
-        print(lora_A[0])
+        print(weight[0][:10])
+        print(lora_A[0][:10])
         print(lora_B[0])
         input()
         
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
-
-        print(weight[0])
-        print(lora_A[0])
+        print(weight[0][:10])
+        print(lora_A[0][:10])
         print(lora_B[0])
         input()
+        weight.requires_grad = False
+        lora_A.requires_grad = True
+        lora_B.requires_grad = True
+        print(f'weight {weight.shape} {weight.requires_grad},  lora_A {lora_A.shape} {lora_A.requires_grad}, lora_B {lora_B.shape} {lora_B.requires_grad}')
+        
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
         torch.save({
             'model_state_dict': model.state_dict(),
