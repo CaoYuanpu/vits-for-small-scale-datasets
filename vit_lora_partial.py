@@ -336,6 +336,9 @@ def main(args):
         lora_A.requires_grad = False
         lora_B.requires_grad = False
         print(f'weight {weight.shape} {weight.requires_grad},  lora_A {lora_A.shape} {lora_A.requires_grad}, lora_B {lora_B.shape} {lora_B.requires_grad}')
+        print(weight[0])
+        print(lora_A[0])
+        print(lora_B[0])
         input()
         
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
