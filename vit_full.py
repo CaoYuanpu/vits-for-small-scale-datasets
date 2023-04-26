@@ -280,8 +280,6 @@ def main(args):
     else:
         logger.debug('Training with bias')
         mark_only_lora_as_trainable(model, bias='all')
-
-    n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     
     full_rank_names = []
     
@@ -309,7 +307,7 @@ def main(args):
 
     for n, p in model.named_parameters():
         print(n, p.shape, p.requires_grad)
-        
+    n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)     
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = build_scheduler(args, optimizer, len(train_loader))
