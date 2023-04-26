@@ -305,9 +305,7 @@ def main(args):
         elif n in full_rank_dict.keys() and 'bias' not in n:
             p.requires_grad = True
 
-    for n, p in model.named_parameters():
-        print(n, p.shape, p.requires_grad)
-    n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)     
+    n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = build_scheduler(args, optimizer, len(train_loader))
@@ -329,6 +327,9 @@ def main(args):
         args.epochs = final_epoch - (checkpoint['epoch'] + 1)
 
     for epoch in tqdm(range(args.epochs)):
+        for n, p in model.named_parameters():
+            print(n, p.shape, p.requires_grad)
+        input()
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
         torch.save({
