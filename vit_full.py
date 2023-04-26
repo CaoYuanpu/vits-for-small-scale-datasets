@@ -328,8 +328,8 @@ def main(args):
 
     for epoch in tqdm(range(args.epochs)):
         for n, p in model.named_parameters():
-            print(n, p.shape, p.requires_grad)
             if n == 'blocks.0.attn.q.weight' or n == 'blocks.0.attn.q.lora_A' or n == 'blocks.0.attn.q.lora_B':
+                print(n, p.shape, p.requires_grad)
                 print(p[0][:10])
         n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
         logger.debug(f'Number of params: {format(n_parameters, ",")}')
