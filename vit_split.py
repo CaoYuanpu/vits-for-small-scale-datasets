@@ -115,6 +115,8 @@ def init_parser():
     parser.add_argument('--vit_mlp_ratio', default=2, type=int, help='MLP layers in the transformer encoder')
     
     parser.add_argument('--lora_rank', default=4, type=int, help='LoRA rank')
+    
+    parser.add_argument('--bias', action='store_true', help='bias')
 
     return parser
 
@@ -249,6 +251,14 @@ def main(args):
         Training
     '''
     
+    for n, p in model.named_parameters():
+        if 'bias' in n and 'norm' not in n:
+            p.requires_grad = False
+    
+    for n, p in model.named_parameters():
+        print(n, p.shape, p.requires_grad)
+    n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    logger.debug(f'Number of params: {format(n_parameters, ",")}')
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = build_scheduler(args, optimizer, len(train_loader))
     
@@ -473,12 +483,12 @@ if __name__ == '__main__':
     if args.is_LSA:
         print("lsa present")
         model_name += "-LSA"
-        
-    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}]-Seed{args.seed}_split"
+
+    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}]-Seed{args.seed}-Bias{args.bias}-Split"
     save_path = os.path.join(os.getcwd(), 'save_finetuned', model_name)
     if save_path:
         os.makedirs(save_path, exist_ok=True)
-        
+
     writer = SummaryWriter(os.path.join(os.getcwd(), 'tensorboard', model_name))
     
     # logger
