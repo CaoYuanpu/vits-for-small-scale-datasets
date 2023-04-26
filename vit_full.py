@@ -332,6 +332,10 @@ def main(args):
         n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
         logger.debug(f'Number of params: {format(n_parameters, ",")}')
         input()
+        print(model.blocks.0.attn.q.weight[0][:10])
+        print(model.blocks.0.attn.q.lora_A[0][:10])
+        print(model.blocks.0.attn.q.lora_B[0][:])
+        input()
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
         torch.save({
