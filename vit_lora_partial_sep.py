@@ -345,7 +345,7 @@ def main(args):
                 if 'lora' in n:
                     opt_para.append({"params": p, "lr": args.lr})
                 else:
-                    opt_para.append({"params": p, "lr": args.lr})
+                    opt_para.append({"params": p, "lr": 0.002})
         
         optimizer = torch.optim.AdamW(opt_para, lr=args.lr, weight_decay=args.weight_decay)
         scheduler = build_scheduler(args, optimizer, len(train_loader))
