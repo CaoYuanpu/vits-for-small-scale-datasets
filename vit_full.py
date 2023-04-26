@@ -330,9 +330,6 @@ def main(args):
         final_epoch = args.epochs
         args.epochs = final_epoch - (checkpoint['epoch'] + 1)
 
-    rank = args.lora_rank
-    print(f"Initial rank: {rank}")
-
     for epoch in tqdm(range(args.epochs)):
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
