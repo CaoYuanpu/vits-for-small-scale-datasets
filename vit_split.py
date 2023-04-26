@@ -250,18 +250,18 @@ def main(args):
     '''
         Training
     '''
-    
+
     for n, p in model.named_parameters():
         if 'bias' in n and 'norm' not in n:
             p.requires_grad = False
-    
+
     for n, p in model.named_parameters():
         print(n, p.shape, p.requires_grad)
     n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
     logger.debug(f'Number of params: {format(n_parameters, ",")}')
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
     scheduler = build_scheduler(args, optimizer, len(train_loader))
-    
+
     #summary(model, (3, data_info['img_size'], data_info['img_size']))
     
     print()
@@ -484,7 +484,7 @@ if __name__ == '__main__':
         print("lsa present")
         model_name += "-LSA"
 
-    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}]-Seed{args.seed}-Bias{args.bias}-Split"
+    model_name += f"-{args.tag}-{args.dataset}-LR[{args.lr}]-Seed{args.seed}-Bias{args.bias}-CA-Split"
     save_path = os.path.join(os.getcwd(), 'save_finetuned', model_name)
     if save_path:
         os.makedirs(save_path, exist_ok=True)
