@@ -329,6 +329,8 @@ def main(args):
     for epoch in tqdm(range(args.epochs)):
         for n, p in model.named_parameters():
             print(n, p.shape, p.requires_grad)
+        n_parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
+        logger.debug(f'Number of params: {format(n_parameters, ",")}')
         input()
         lr = train(train_loader, model, criterion, optimizer, epoch, scheduler, args)
         acc1 = validate(val_loader, model, criterion, lr, args, epoch=epoch)
